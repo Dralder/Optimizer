@@ -6,6 +6,8 @@ import sys
 import time
 from datetime import datetime, timedelta
 
+VERSION = "v1.1.0"
+
 CREATE_NO_WINDOW = 0x08000000
 
 SERVICES_TO_STOP = [
@@ -101,7 +103,7 @@ def stop_services():
 
 
 def apply_network_tweaks():
-    log("NETWORK", "Applying global TCP stack tweaks (no per-adapter changes)...")
+    log("NETWORK", "Applying global TCP stack tweaks...")
     commands = [
         ["netsh", "int", "tcp", "set", "global", "autotuninglevel=normal"],
         ["netsh", "int", "tcp", "set", "global", "ecncapability=disabled"],
@@ -109,11 +111,11 @@ def apply_network_tweaks():
     ]
     for cmd in commands:
         subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, creationflags=CREATE_NO_WINDOW)
-    log("NETWORK", "Done. Global TCP settings only -- VPN/other adapters untouched.")
+    log("NETWORK", "Done.")
 
 
 def apply_game_settings():
-    log("GAME", "Applying user-level (HKCU) game settings...")
+    log("GAME", "Applying user-level game settings...")
     commands = [
         ["reg", "add", r"HKCU\System\GameConfigStore", "/v", "GameDVR_Enabled",
          "/t", "REG_DWORD", "/d", "0", "/f"],
@@ -126,7 +128,7 @@ def apply_game_settings():
     ]
     for cmd in commands:
         subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, creationflags=CREATE_NO_WINDOW)
-    log("GAME", "Game Bar/DVR capture disabled, fullscreen optimizations disabled, Game Mode ensured on.")
+    log("GAME", "Done.")
 
 
 def watchdog_tick():
@@ -144,6 +146,7 @@ if __name__ == "__main__":
     os.system('cls' if os.name == 'nt' else 'clear')
     print("==============================================")
     print("          GAMING OPTIMIZER ACTIVATED           ")
+    print(f"                {VERSION} by Dralder")
     print("==============================================")
 
     try:
@@ -164,7 +167,7 @@ if __name__ == "__main__":
                 last_temp_clean = time.time()
 
     except KeyboardInterrupt:
-        log("EXIT", "Stopped by user. Services/settings remain applied -- nothing reverted.")
+        log("EXIT", "Stopped by user. Services/settings remain applied.")
     except Exception as e:
         print(f"Error: {e}")
         input("Press Enter to exit...")
